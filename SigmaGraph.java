@@ -110,23 +110,27 @@ public class SigmaGraph {
     }
 
     public boolean newF2FEdge(Function from, Function to) {
-        ++f2fEdgeCnt;
-        return newEdge(getFunctionNode(from), getFunctionNode(to));
+        boolean ret = newEdge(getFunctionNode(from), getFunctionNode(to));
+        f2fEdgeCnt += ret ? 1 : 0;
+        return ret;
     }
 
     public boolean newF2VEdge(Function from, GlobalVariable to)  {
-        ++f2vEdgeCnt;
-        return newEdge(getFunctionNode(from), getGlobalVarNode(to));
+        boolean ret = newEdge(getFunctionNode(from), getGlobalVarNode(to));
+        f2vEdgeCnt += ret ? 1 : 0;
+        return ret;
     }
 
     public boolean newV2FEdge(GlobalVariable from, Function to) {
-        ++v2fEdgeCnt;
-        return newEdge(getGlobalVarNode(from), getFunctionNode(to));
+        boolean ret = newEdge(getGlobalVarNode(from), getFunctionNode(to));
+        v2fEdgeCnt += ret ? 1 : 0;;
+        return ret;
     }
 
     public boolean newV2VEdge(GlobalVariable from, GlobalVariable to) {
-        ++v2vEdgeCnt;
-        return newEdge(getGlobalVarNode(from), getGlobalVarNode(to));
+        boolean ret = newEdge(getGlobalVarNode(from), getGlobalVarNode(to));
+        v2vEdgeCnt += ret ? 1 : 0;
+        return ret;
     }
 
     private void _dfs(Node cur, Set<Node> vis, BufferedWriter writer) throws Exception {
@@ -160,7 +164,8 @@ public class SigmaGraph {
             if (from instanceof FunctionNode)
                 for (Node to: from.getEdges())
                     if (to instanceof FunctionNode)
-                        writer.write(String.format("%s %s\n", from, to));
+                        writer.write(String.format("%s %s\n", node2Func.get(from), node2Func.get(to)));
+        writer.write("\n");
 
         if (expFlg) writer.write(String.format("Function2Variable Edge Count: "));
         writer.write(String.format("%d\n", getF2VEdgeNum()));
@@ -168,7 +173,8 @@ public class SigmaGraph {
             if (from instanceof FunctionNode)
                 for (Node to: from.getEdges())
                     if (to instanceof GlobalVarNode)
-                        writer.write(String.format("%s %s\n", from, to));
+                        writer.write(String.format("%s %s\n", node2Func.get(from), node2Var.get(to)));
+        writer.write("\n");
 
         if (expFlg) writer.write(String.format("Variable2Function Edge Count: "));
         writer.write(String.format("%d\n", getV2FEdgeNum()));
@@ -176,7 +182,8 @@ public class SigmaGraph {
             if (from instanceof GlobalVarNode)
                 for (Node to: from.getEdges())
                     if (to instanceof FunctionNode)
-                        writer.write(String.format("%s %s\n", from, to));
+                        writer.write(String.format("%s %s\n", node2Var.get(from), node2Func.get(to)));
+        writer.write("\n");
 
         if (expFlg) writer.write(String.format("Variable2Variable Edge Count: "));
         writer.write(String.format("%d\n", getV2VEdgeNum()));
@@ -184,6 +191,7 @@ public class SigmaGraph {
             if (from instanceof GlobalVarNode)
                 for (Node to: from.getEdges())
                     if (to instanceof GlobalVarNode)
-                        writer.write(String.format("%s %s\n", from, to));
+                        writer.write(String.format("%s %s\n", node2Var.get(from), node2Var.get(to)));
+        writer.write("\n");
     }
 }

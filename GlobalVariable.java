@@ -25,4 +25,9 @@ public class GlobalVariable implements Comparable<GlobalVariable> {
         return this.offset == ((GlobalVariable)var).offset;
     }
 
+    @Override 
+    public int hashCode() {
+        return Integer.hashCode(offset);
+    }
+
 }
