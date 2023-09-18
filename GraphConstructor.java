@@ -46,6 +46,11 @@ public class GraphConstructor extends GhidraScript {
         return (int)((Scalar)inst.getOpObjects(0)[1]).getValue();
     }
 
+    private int getLoadOffset(Instruction inst) {
+        if (inst.getOpObjects(1).length == 1) return 0;
+        return (int)((Scalar)inst.getOpObjects(1)[1]).getValue();
+    }
+
     private GlobalVariable getGlobalVariable(int offset) {
         GlobalVariable var = new GlobalVariable(offset);
         if (varSet.contains(var)) return var;
@@ -78,7 +83,7 @@ public class GraphConstructor extends GhidraScript {
         println("Done.");
     }
 
-    private void createGlobalVarEdges() throws Exception {
+    private void createFunctionAndVariableEdges() throws Exception {
 
         // LinkedList<Node> queue = new LinkedList<>();
         // queue.push(graph.getFunctionNode(currentProgram.get));
@@ -107,72 +112,75 @@ public class GraphConstructor extends GhidraScript {
                     case PcodeOp.STORE:
                         graph.newF2VEdge(f, getGlobalVariable(getStoreOffset(inst)));
                         break;
+
+                    case PcodeOp.LOAD:
+                        graph.newV2FEdge(getGlobalVariable(getLoadOffset(inst)), f);
+                        break;
                 
                     default:
                         break;
                 }
 
-                if (opcode == PcodeOp.STORE) {
+                // if (opcode == PcodeOp.STORE) {
 
-                    boolean a0Flg = containsA0(inst);
+                //     boolean a0Flg = containsA0(inst);
 
-                    if (a0Flg) {
+                //     if (a0Flg) {
 
-                        writer.write(inst.toString());
-                        writer.newLine();
+                //         writer.write(inst.toString());
+                //         writer.newLine();
 
-                        int opNum = inst.getNumOperands();
-                        for (int i = 0; i < opNum; ++i) {
-                            Object[] ops = inst.getOpObjects(i);
-                            writer.write(Arrays.toString(ops));
-                        }
+                //         int opNum = inst.getNumOperands();
+                //         for (int i = 0; i < opNum; ++i) {
+                //             Object[] ops = inst.getOpObjects(i);
+                //             writer.write(Arrays.toString(ops));
+                //         }
 
-                        writer.newLine();
-                        writer.newLine();
+                //         writer.newLine();
+                //         writer.newLine();
 
-                    }
+                //     }
 
-                } else if (opcode == PcodeOp.LOAD) {
+                // } else if (opcode == PcodeOp.LOAD) {
 
-                    boolean a0Flg = containsA0(inst);
+                //     boolean a0Flg = containsA0(inst);
 
-                    if (a0Flg) {
+                //     if (a0Flg) {
 
-                        writer.write(inst.toString());
-                        writer.newLine();
+                //         writer.write(inst.toString());
+                //         writer.newLine();
 
-                        int opNum = inst.getNumOperands();
-                        for (int i = 0; i < opNum; ++i) {
-                            Object[] ops = inst.getOpObjects(i);
-                            writer.write(Arrays.toString(ops));
-                        }
+                //         int opNum = inst.getNumOperands();
+                //         for (int i = 0; i < opNum; ++i) {
+                //             Object[] ops = inst.getOpObjects(i);
+                //             writer.write(Arrays.toString(ops));
+                //         }
 
-                        writer.newLine();
-                        writer.newLine();
+                //         writer.newLine();
+                //         writer.newLine();
 
-                    }
+                //     }
 
-                } else {
-                    boolean a0Flg = containsA0(inst);
+                // } else {
+                //     boolean a0Flg = containsA0(inst);
 
-                    if (a0Flg) {
-                        writer.write(inst.toString());
-                        writer.newLine();
+                //     if (a0Flg) {
+                //         writer.write(inst.toString());
+                //         writer.newLine();
 
-                        int opNum = inst.getNumOperands();
-                        for (int i = 0; i < opNum; ++i) {
-                            Object[] ops = inst.getOpObjects(i);
-                            writer.write(Arrays.toString(ops));
-                        }
+                //         int opNum = inst.getNumOperands();
+                //         for (int i = 0; i < opNum; ++i) {
+                //             Object[] ops = inst.getOpObjects(i);
+                //             writer.write(Arrays.toString(ops));
+                //         }
 
-                        writer.newLine();
-                        writer.newLine();
-                    }
-                }
+                //         writer.newLine();
+                //         writer.newLine();
+                //     }
+                // }
             }
         }
 
-        
     }
 
     @Override
@@ -185,11 +193,9 @@ public class GraphConstructor extends GhidraScript {
         setImageBase();
         createInterProceduralCallGraph();
         // dfsGraph();
-        createGlobalVarEdges();
-        
-        
-        
-        
+        createFunctionAndVariableEdges();
+
+        graph.export(writer, true);
         writer.close();
 
     }
