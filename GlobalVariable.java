@@ -1,6 +1,17 @@
+/**
+ * Global variable class, implements {@code Comparable}, {@code equals()} and {@code hashCode()} for {@code TreeSet} support.\
+ */
 public class GlobalVariable implements Comparable<GlobalVariable> {
+
+    /**
+     * The offset of the variable
+     */
     private int offset;
 
+    /**
+     * Constructor
+     * @param offset The offset of the variable
+     */
     public GlobalVariable(int offset) {
         this.offset = offset;
     }
