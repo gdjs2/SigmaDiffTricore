@@ -1,6 +1,7 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import ghidra.app.script.GhidraScript;
@@ -11,15 +12,18 @@ import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.FunctionManager;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.InstructionIterator;
+import ghidra.program.model.mem.MemoryAccessException;
 import ghidra.program.model.pcode.PcodeOp;
 import ghidra.program.model.scalar.Scalar;
 
 public class SigmadiffTricore extends GhidraScript {
 
     final int imageBase = 0x80000000;
+    final int smallDataSectionBase = 0x0;
 
-    // This writer is just convenient for debugging
+    // This writer & debugger is just convenient for debugging
     private BufferedWriter writer;
+    private BufferedWriter debugger;
 
     /**
      * Created graph
@@ -105,6 +109,34 @@ public class SigmadiffTricore extends GhidraScript {
         if (varSet.contains(var)) return var;
         varSet.add(var);
         return var;
+    }
+
+    /**
+     * Read data from a {@code GlobalVariable}. This function is NOT TESTED!!!
+     * @param var
+     * @return
+     * @throws MemoryAccessException
+     */
+    private int readData(GlobalVariable var) throws MemoryAccessException {
+        var addr = currentProgram.getAddressFactory().getAddress(String.format("%x", imageBase + var.getOffset()));
+        var data = getDataAt(addr);
+        return data.getInt(0);
+    }
+
+    @SuppressWarnings("unused")
+    private int checkSmallDataSectionBase() throws Exception {
+        FunctionIterator functionIterator = currentProgram.getFunctionManager().getFunctions(true);
+        for (Function f: functionIterator) {
+            InstructionIterator instIter = currentProgram.getListing().getInstructions(f.getBody(), true);
+            for (Instruction inst: instIter) {
+                if (containsA0(inst)) {
+                    debugger.write(inst.toString());
+                    debugger.newLine();
+                }
+            }
+        }
+
+        return 0x0;
     }
 
     /**
@@ -209,30 +241,61 @@ public class SigmadiffTricore extends GhidraScript {
 
     }
 
-    public void createVariablePoint2FunctionEdge() {
-        // TODO
+    /**
+     * Create edges between global variables and functions if the variable stores the entry of a function.
+     * This function is NOT TESTED!!!
+     * @throws MemoryAccessException
+     */
+    @Deprecated
+    public void createVariablePoint2FunctionEdge() throws MemoryAccessException {
+        TreeMap<Integer, Function> entry2FunctionMap = new TreeMap<>();
+        for (var f: currentProgram.getFunctionManager().getFunctions(true)) {
+            entry2FunctionMap.put((int)f.getEntryPoint().getOffset(), f);
+        }
+        for (var v: varSet) {
+            int data = readData(v);
+            if (entry2FunctionMap.containsKey(data)) {
+                graph.newV2FEdge(v, entry2FunctionMap.get(data));
+            }
+        }
     }
 
-    public void createVariablePoint2VarlaibleEdge() {
-        // TODO
+    /**
+     * Create edges between global variables if the variable stores the pointer to another variable.
+     * This function is NOT TESTED!!!
+     * @throws MemoryAccessException
+     */
+    @Deprecated
+    public void createVariablePoint2VarlaibleEdge() throws MemoryAccessException {
+        TreeMap<Integer, GlobalVariable> offset2VariableMap = new TreeMap<>();
+        for (var v: varSet) {
+            offset2VariableMap.put(v.getOffset(), v);
+        }
+        for (var v: varSet) {
+            int data = readData(v);
+            if (offset2VariableMap.containsKey(data)) {
+                graph.newV2VEdge(v, offset2VariableMap.get(data));
+            }
+        }
     }
 
     @Override
     protected void run() throws Exception {
 
-        writer = new BufferedWriter(new FileWriter("/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/graph_image1_exp.txt"));
+        writer = new BufferedWriter(new FileWriter("/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/graphs/graph_image2_exp.txt"));
+        debugger = new BufferedWriter(new FileWriter("/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/debug.txt"));
 
         graph = new SigmaGraph();
         varSet = new TreeSet<>();
 
         setImageBase();
         createInterProceduralCallGraph();
-        // dfsGraph();
         createFunctionAndVariableEdges();
         createVariableOrderEdges();
 
         graph.export(writer, true);
         writer.close();
+        debugger.close();
 
     }
 }
