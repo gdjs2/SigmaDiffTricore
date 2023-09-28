@@ -282,8 +282,8 @@ public class SigmadiffTricore extends GhidraScript {
     @Override
     protected void run() throws Exception {
 
-        writer = new BufferedWriter(new FileWriter("/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/graphs/graph_image2_exp.txt"));
-        debugger = new BufferedWriter(new FileWriter("/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/debug.txt"));
+        writer = new BufferedWriter(new FileWriter("./graphs/graph_image2_exp.txt"));
+        debugger = new BufferedWriter(new FileWriter("./debug.txt"));
 
         graph = new SigmaGraph();
         varSet = new TreeSet<>();
