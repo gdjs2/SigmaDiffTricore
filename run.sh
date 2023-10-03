@@ -1,0 +1,1 @@
+python3 ./run.py -g /home/gdjs2/Repositories/Ghidra/ghidra_10.3.3_PUBLIC -p ./ --image1 /home/gdjs2/Desktop/deepbits_research/D1711A05C000_MY13B6.bin --image2 /home/gdjs2/Desktop/deepbits_research/D1711A05C000_MY13B6_060.bin

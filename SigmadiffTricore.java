@@ -282,6 +282,12 @@ public class SigmadiffTricore extends GhidraScript {
     @Override
     protected void run() throws Exception {
 
+        String[] args = getScriptArgs();
+        if (args.length == 2) {
+            printf("Graph 1 File: %s\n", args[0]);
+            printf("Graph 2 File: %s\n", args[1]);
+        }
+
         writer = new BufferedWriter(new FileWriter("./graphs/graph_image2_exp.txt"));
         debugger = new BufferedWriter(new FileWriter("./debug.txt"));
 
