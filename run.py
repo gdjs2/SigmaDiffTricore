@@ -1,10 +1,16 @@
 import argparse
 import os
 import subprocess
+import torch
+from doc2vec.data_utils_doc2vec_usemodel import Corpus
 
 GRAPHS_DIR = './graphs'
 GRAPHS_IMAGE_1 = os.path.join(GRAPHS_DIR, 'graph_image1.txt')
 GRAPHS_IMAGE_2 = os.path.join(GRAPHS_DIR, 'graph_image2.txt')
+PROJECT_NAME = 'SigmadiffTricore'
+SCRIPT_PATH = './ghidra_scripts'
+DOC2VEC_PATH = './doc2vec'
+DOC2VEC_MODEL = 'Doc2Vec_Model.pkl'
 
 def check_env():
     if not os.path.exists(GRAPHS_DIR):
@@ -36,12 +42,17 @@ def execute_ghidra_scripts():
     subprocess.run(command_image1)
     subprocess.run(command_image2)
 
+def generate_embeddings(image):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    corpus = Corpus()
+    model = os.path.join(DOC2VEC_PATH, DOC2VEC_MODEL)
+    # corpus. TODO
+
+
 if __name__ == '__main__':
 
     # Predefine some constants
     GHIDRA_HOME, PROJECT_PATH, IMAGE1, IMAGE2 = init_args()
-    PROJECT_NAME = 'SigmadiffTricore'
-    SCRIPT_PATH = './'
 
     # Print some information
     print('GHIDRA_HOME: {}'.format(GHIDRA_HOME))
