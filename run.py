@@ -21,7 +21,7 @@ def init_args():
     args = parser.parse_args()
     return args.ghidra_home, args.project_path, args.image1, args.image2
 
-def execute_scripts():
+def execute_ghidra_scripts():
     # Analyzer path
     analyzer = os.path.join(GHIDRA_HOME, 'support', 'analyzeHeadless')    
     # Define the commands
@@ -53,4 +53,4 @@ if __name__ == '__main__':
     # Check the environment
     check_env()
     # Execute the scripts
-    execute_scripts()
+    execute_ghidra_scripts()
