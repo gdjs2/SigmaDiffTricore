@@ -81,7 +81,7 @@ def execute_graph_generation_scripts(image1_path, image2_path):
             "[bold green]Generating the graphs & Preparing for embedding generation for {}(It may take a while) ...".format(image_name)
         ) as status:
             proc = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        status.update("[bold green]Finish generating the graphs & Preparing for embedding generation for {}!".format(image_name))
+        logger.info("Finish generating the graphs & Preparing for embedding generation for {}!".format(image_name))
 
         if proc.returncode != 0:
             logger.error("Failed to execute the command: {}. Please check log files under: {}".format(command, image_log_dir))
@@ -136,7 +136,7 @@ def generate_embeddings(image1_path, image2_path):
         label_file = open(node_label_file, "r")
         lines = label_file.readlines()
 
-        for each_line in track(lines):
+        for each_line in track(lines, description="Inferring Embeddings for {} ...".format(image_name)):
             records = each_line.strip().split(", ")
 
             if each_line.startswith("#"):
