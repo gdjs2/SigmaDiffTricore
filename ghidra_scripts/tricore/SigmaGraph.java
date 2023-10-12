@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import ghidra.program.model.listing.Function;
 
 /**
@@ -204,51 +209,67 @@ public class SigmaGraph {
     /**
      * Export the graph to a writer
      * @param writer {@code Writer} for exporting the graph
-     * @param expFlg {@true} if want to export some explaination
      * @throws Exception
      */
-    public void export(Writer writer, boolean expFlg) throws Exception {
+    public void export(Writer writer) throws Exception {
+    
+        JsonObject jsonObject = new JsonObject();
 
-        if (expFlg) writer.write(String.format("Function Node Count: "));
-        writer.write(String.format("%d\n", getFunctionNodeNum()));
+        JsonArray functionNodes = new JsonArray();
+        JsonArray variableNodes = new JsonArray();
 
-        if (expFlg) writer.write(String.format("Variable Node Count: "));
-        writer.write(String.format("%d\n", getVariableNodeNum()));
+        JsonArray f2fEdges = new JsonArray();
+        JsonArray f2vEdges = new JsonArray();
+        JsonArray v2fEdges = new JsonArray();
+        JsonArray v2vEdges = new JsonArray();
 
-        if (expFlg) writer.write(String.format("Function2Function Edge Count: "));
-        writer.write(String.format("%d\n", getF2FEdgeNum()));
-        for (Node from: nodes)
-            if (from instanceof FunctionNode)
-                for (Node to: from.getEdges())
-                    if (to instanceof FunctionNode)
-                        writer.write(String.format("%s %s\n", node2Func.get(from), node2Func.get(to)));
-        writer.write("\n");
+        for (Node node: nodes) {
+            if (node instanceof FunctionNode) {
+                functionNodes.add(node2Func.get(node).getName());
+                for (Node to: node.getEdges()) {
+                    if (to instanceof FunctionNode) {
+                        JsonObject edge = new JsonObject();
+                        edge.addProperty("from", node2Func.get(node).getName());
+                        edge.addProperty("to", node2Func.get(to).getName());
+                        f2fEdges.add(edge);
+                    }
+                    else if (to instanceof GlobalVarNode) {
+                        JsonObject edge = new JsonObject();
+                        edge.addProperty("from", node2Func.get(node).getName());
+                        edge.addProperty("to", node2Var.get(to).toString());
+                        f2vEdges.add(edge);
+                    }
+                }
+            }
+                
+            else if (node instanceof GlobalVarNode) {
+                variableNodes.add(node2Var.get(node).toString());
+                for (Node to: node.getEdges()) {
+                    if (to instanceof FunctionNode) {
+                        JsonObject edge = new JsonObject();
+                        edge.addProperty("from", node2Var.get(node).toString());
+                        edge.addProperty("to", node2Func.get(to).getName());
+                        v2fEdges.add(edge);
+                    }
+                    else if (to instanceof GlobalVarNode) {
+                        JsonObject edge = new JsonObject();
+                        edge.addProperty("from", node2Var.get(node).toString());
+                        edge.addProperty("to", node2Var.get(to).toString());
+                        v2vEdges.add(edge);
+                    }
+                }
+            }
+                
+        }
 
-        if (expFlg) writer.write(String.format("Function2Variable Edge Count: "));
-        writer.write(String.format("%d\n", getF2VEdgeNum()));
-        for (Node from: nodes)
-            if (from instanceof FunctionNode)
-                for (Node to: from.getEdges())
-                    if (to instanceof GlobalVarNode)
-                        writer.write(String.format("%s %s\n", node2Func.get(from), node2Var.get(to)));
-        writer.write("\n");
+        jsonObject.add("functionNodes", functionNodes);
+        jsonObject.add("variableNodes", variableNodes);
+        jsonObject.add("f2fEdges", f2fEdges);
+        jsonObject.add("f2vEdges", f2vEdges);
+        jsonObject.add("v2fEdges", v2fEdges);
+        jsonObject.add("v2vEdges", v2vEdges);
 
-        if (expFlg) writer.write(String.format("Variable2Function Edge Count: "));
-        writer.write(String.format("%d\n", getV2FEdgeNum()));
-        for (Node from: nodes)
-            if (from instanceof GlobalVarNode)
-                for (Node to: from.getEdges())
-                    if (to instanceof FunctionNode)
-                        writer.write(String.format("%s %s\n", node2Var.get(from), node2Func.get(to)));
-        writer.write("\n");
-
-        if (expFlg) writer.write(String.format("Variable2Variable Edge Count: "));
-        writer.write(String.format("%d\n", getV2VEdgeNum()));
-        for (Node from: nodes)
-            if (from instanceof GlobalVarNode)
-                for (Node to: from.getEdges())
-                    if (to instanceof GlobalVarNode)
-                        writer.write(String.format("%s %s\n", node2Var.get(from), node2Var.get(to)));
-        writer.write("\n");
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        gson.toJson(jsonObject, writer);
     }
 }

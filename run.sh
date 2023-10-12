@@ -1,1 +1,5 @@
 python3 ./run.py -g /home/gdjs2/Repositories/Ghidra/ghidra_10.3.3_PUBLIC -p ./ --image1 /home/gdjs2/Desktop/deepbits_research/D1711A05C000_MY13B6.bin --image2 /home/gdjs2/Desktop/deepbits_research/D1711A05C000_MY13B6_060.bin
+
+python3 ./run.py -g /Users/gdjs2/Downloads/ghidra_10.3.3_PUBLIC -p ./ --image1 /Users/gdjs2/Downloads/deepbits_research/D1711A05C000_MY13B6.bin --image2 /Users/gdjs2/Downloads/deepbits_research/D1711A05C000_MY13B6_060.bin
+
+/Users/gdjs2/Downloads/ghidra_10.3.3_PUBLIC/support/analyzeHeadless /tmp tricore -processor tricore:LE:32:default -preScript DisassembleAll -scriptPath "/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/ghidra_scripts/sigmadiff;/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/ghidra_scripts/tricore" -deleteProject -overwrite -import /Users/gdjs2/Downloads/deepbits_research/D1711A05C000_MY13B6.bin -postScript VSAPCode /tmp/

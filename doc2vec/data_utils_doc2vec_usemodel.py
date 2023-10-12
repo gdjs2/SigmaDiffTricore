@@ -29,16 +29,16 @@ class Corpus(object):
         f_model=open(pretrained_subject+'/Doc2Vec_Model.pkl','rb')
         model = pickle.load(f_model)
 
-        func_matching=open(func_matching_file,'r')
-        lines=func_matching.readlines()
-        func_matching_dict={}
-        func_matching_list = []
-        for each_line in lines:
-            records=each_line.strip().split(' ')
-            if records[0] in func_matching_dict.keys():
-                continue
-            func_matching_dict[records[0]]=records[1]
-            func_matching_list.append((records[0], records[1]))
+        # func_matching=open(func_matching_file,'r')
+        # lines=func_matching.readlines()
+        # func_matching_dict={}
+        # func_matching_list = []
+        # for each_line in lines:
+        #     records=each_line.strip().split(' ')
+        #     if records[0] in func_matching_dict.keys():
+        #         continue
+        #     func_matching_dict[records[0]]=records[1]
+        #     func_matching_list.append((records[0], records[1]))
 
 
         last_node_seq_1=0
@@ -255,23 +255,23 @@ class Corpus(object):
             # ndarray=ndarray.astype(int)
             # edges_2.append(ndarray)
 
-        train_y=[]
-        trainy_dict = defaultdict(list)
-        graph_edge_file=open(training_file,'r')
-        lines=graph_edge_file.readlines()
-        for each_line in lines:
-            records=each_line.strip().split(' ')
+        # train_y=[]
+        # trainy_dict = defaultdict(list)
+        # graph_edge_file=open(training_file,'r')
+        # lines=graph_edge_file.readlines()
+        # for each_line in lines:
+        #     records=each_line.strip().split(' ')
 
-            float_list=list(map(float,records))
-            # float_list=list(map(float,[records[1],records[0]]))
-            ndarray=np.array(float_list)
-            ndarray=ndarray.astype(int)
-            train_y.append(ndarray)
-            trainy_dict[int(records[0])].append(int(records[1]))
+        #     float_list=list(map(float,records))
+        #     # float_list=list(map(float,[records[1],records[0]]))
+        #     ndarray=np.array(float_list)
+        #     ndarray=ndarray.astype(int)
+        #     train_y.append(ndarray)
+        #     trainy_dict[int(records[0])].append(int(records[1]))
 
-        edges_1=torch.tensor(edges_1)
-        edges_2=torch.tensor(edges_2)
-        train_y=torch.tensor(train_y)
+        # edges_1=torch.tensor(edges_1)
+        # edges_2=torch.tensor(edges_2)
+        # train_y=torch.tensor(train_y)
 
         embedding_1=torch.tensor(embedding_seq_1)
         embedding_2=torch.tensor(embedding_seq_2)
@@ -323,108 +323,108 @@ class Corpus(object):
         f.close()
         
 
-        if last_node_seq_1 < 50000 and last_node_seq_2 < 50000:
-            return [embedding_1],[edges_1],[embedding_2],[edges_2],[train_y],[source_type_list],[dst_type_list],[source_lineNum_list],[dst_lineNum_list],[func_matching_dict],[src_func_dict],[des_func_dict],[source_value_dict],[dst_value_dict],[source_decompile_dict],[dst_decompile_dict], None, None
-        else:
-            embedding_1_list = []
-            edges_1_list = []
-            embedding_2_list = []
-            edges_2_list = []
-            train_y_list = []
-            source_type_list_list = []
-            dst_type_list_list = []
-            source_lineNum_list_list = []
-            dst_lineNum_list_list = []
-            func_matching_dict_list = []
-            src_func_dict_list = []
-            des_func_dict_list = []
-            source_value_dict_list = []
-            dst_value_dict_list = []
-            source_decompile_dict_list = []
-            dst_decompile_dict_list = []
-            remove_idx1 = []
-            remove_idx2 = []
-            node_mapping1_list = []
-            node_mapping2_list = []
-            has_next = True
-            small_func_pairs = []
-            # slice some matched functions
-            while has_next:
-                if (last_node_seq_1 - len(remove_idx1) > 50000 or last_node_seq_2 - len(remove_idx2) > 50000) and len(func_matching_list) > 0:
-                    func_pair1, func_pair2 = func_matching_list.pop(0)
+        # if last_node_seq_1 < 50000 and last_node_seq_2 < 50000:
+        #     return [embedding_1],[edges_1],[embedding_2],[edges_2],[train_y],[source_type_list],[dst_type_list],[source_lineNum_list],[dst_lineNum_list],[func_matching_dict],[src_func_dict],[des_func_dict],[source_value_dict],[dst_value_dict],[source_decompile_dict],[dst_decompile_dict], None, None
+        # else:
+        #     embedding_1_list = []
+        #     edges_1_list = []
+        #     embedding_2_list = []
+        #     edges_2_list = []
+        #     train_y_list = []
+        #     source_type_list_list = []
+        #     dst_type_list_list = []
+        #     source_lineNum_list_list = []
+        #     dst_lineNum_list_list = []
+        #     func_matching_dict_list = []
+        #     src_func_dict_list = []
+        #     des_func_dict_list = []
+        #     source_value_dict_list = []
+        #     dst_value_dict_list = []
+        #     source_decompile_dict_list = []
+        #     dst_decompile_dict_list = []
+        #     remove_idx1 = []
+        #     remove_idx2 = []
+        #     node_mapping1_list = []
+        #     node_mapping2_list = []
+        #     has_next = True
+        #     small_func_pairs = []
+        #     # slice some matched functions
+        #     while has_next:
+        #         if (last_node_seq_1 - len(remove_idx1) > 50000 or last_node_seq_2 - len(remove_idx2) > 50000) and len(func_matching_list) > 0:
+        #             func_pair1, func_pair2 = func_matching_list.pop(0)
                     
-                    node_ids1 = src_func_node_list[func_pair1]
-                    node_ids2 = des_func_node_list[func_pair2]
-                    if len(node_ids1) < 25 or len(node_ids2) < 25:
-                        small_func_pairs.append((func_pair1, func_pair2))
-                        continue
-                    node_ids1.sort()
-                    node_ids2.sort()
-                    source_line_set = set([source_lineNum_list[id] for id in node_ids1])
-                    dst_line_set = set([dst_lineNum_list[id] for id in node_ids2])
-                    if len(source_line_set) == 1 or len(dst_line_set) == 1:
-                        continue
-                    remove_idx1.extend(node_ids1[1:])
-                    remove_idx2.extend(node_ids2[1:])
-                    func_matching_dict.pop(func_pair1)
-                    func_matching_dict_list.append({func_pair1:func_pair2})
+        #             node_ids1 = src_func_node_list[func_pair1]
+        #             node_ids2 = des_func_node_list[func_pair2]
+        #             if len(node_ids1) < 25 or len(node_ids2) < 25:
+        #                 small_func_pairs.append((func_pair1, func_pair2))
+        #                 continue
+        #             node_ids1.sort()
+        #             node_ids2.sort()
+        #             source_line_set = set([source_lineNum_list[id] for id in node_ids1])
+        #             dst_line_set = set([dst_lineNum_list[id] for id in node_ids2])
+        #             if len(source_line_set) == 1 or len(dst_line_set) == 1:
+        #                 continue
+        #             remove_idx1.extend(node_ids1[1:])
+        #             remove_idx2.extend(node_ids2[1:])
+        #             func_matching_dict.pop(func_pair1)
+        #             func_matching_dict_list.append({func_pair1:func_pair2})
                     
-                elif (last_node_seq_1 - len(remove_idx1) > 50000 or last_node_seq_2 - len(remove_idx2) > 50000) and len(func_matching_list) == 0 and len(small_func_pairs) > 0:
-                    node_ids1 = []
-                    node_ids2 = []
-                    func_matching_tmp = {}
-                    while len(small_func_pairs) > 0 and len(node_ids1) < 4000:
-                        func_pair1, func_pair2 = small_func_pairs.pop(0)
-                        node_ids1.extend(src_func_node_list[func_pair1])
-                        node_ids2.extend(des_func_node_list[func_pair2])
-                        remove_idx1.extend(src_func_node_list[func_pair1][1:])
-                        remove_idx2.extend(des_func_node_list[func_pair2][1:])
-                        func_matching_dict.pop(func_pair1)
-                        func_matching_tmp[func_pair1] = func_pair2
-                    func_matching_dict_list.append(func_matching_tmp)
-                    node_ids1.sort()
-                    node_ids2.sort()
-                elif (last_node_seq_1 - len(remove_idx1) > 50000 or last_node_seq_2 - len(remove_idx2) > 50000) and len(func_matching_list) == 0 and len(small_func_pairs) ==0:
-                    break
-                else:
-                    has_next = False
-                    node_ids1 = list(set(source_type_list.keys())-set(remove_idx1))
-                    node_ids2 = list(set(dst_type_list.keys())-set(remove_idx2))
-                    node_ids1.sort()
-                    node_ids2.sort()
-                    func_matching_dict_list.append(func_matching_dict)
+        #         elif (last_node_seq_1 - len(remove_idx1) > 50000 or last_node_seq_2 - len(remove_idx2) > 50000) and len(func_matching_list) == 0 and len(small_func_pairs) > 0:
+        #             node_ids1 = []
+        #             node_ids2 = []
+        #             func_matching_tmp = {}
+        #             while len(small_func_pairs) > 0 and len(node_ids1) < 4000:
+        #                 func_pair1, func_pair2 = small_func_pairs.pop(0)
+        #                 node_ids1.extend(src_func_node_list[func_pair1])
+        #                 node_ids2.extend(des_func_node_list[func_pair2])
+        #                 remove_idx1.extend(src_func_node_list[func_pair1][1:])
+        #                 remove_idx2.extend(des_func_node_list[func_pair2][1:])
+        #                 func_matching_dict.pop(func_pair1)
+        #                 func_matching_tmp[func_pair1] = func_pair2
+        #             func_matching_dict_list.append(func_matching_tmp)
+        #             node_ids1.sort()
+        #             node_ids2.sort()
+        #         elif (last_node_seq_1 - len(remove_idx1) > 50000 or last_node_seq_2 - len(remove_idx2) > 50000) and len(func_matching_list) == 0 and len(small_func_pairs) ==0:
+        #             break
+        #         else:
+        #             has_next = False
+        #             node_ids1 = list(set(source_type_list.keys())-set(remove_idx1))
+        #             node_ids2 = list(set(dst_type_list.keys())-set(remove_idx2))
+        #             node_ids1.sort()
+        #             node_ids2.sort()
+        #             func_matching_dict_list.append(func_matching_dict)
 
-                node_mapping1 = {n:i for i, n in enumerate(node_ids1)}
-                node_mapping2 = {n:i for i, n in enumerate(node_ids2)}
-                node_mapping1_list.append(node_mapping1)
-                node_mapping2_list.append(node_mapping2)
-                embedding_1_list.append(torch.tensor([embedding_seq_1[i] for i in node_ids1]))
-                embedding_2_list.append(torch.tensor([embedding_seq_2[i] for i in node_ids2]))
-                edges1 = [[node_mapping1[e1], node_mapping1[e2]] for e1 in node_ids1 for e2 in edges1_dict[e1] if e2 in node_ids1]
-                edges2 = [[node_mapping2[e1], node_mapping2[e2]] for e1 in node_ids2 for e2 in edges2_dict[e1] if e2 in node_ids2]
-                edges_1_list.append(torch.tensor(edges1))
-                edges_2_list.append(torch.tensor(edges2))
-                trainy = [[node_mapping1[e1], node_mapping2[e2]] for e1 in node_ids1 for e2 in trainy_dict[e1] if e2 in node_ids2]
-                train_y_list.append(torch.tensor(trainy))
-                source_type = {node_mapping1[id]:source_type_list[id] for id in node_ids1}
-                source_type_list_list.append(source_type)
-                dst_type = {node_mapping2[id]:dst_type_list[id] for id in node_ids2}
-                dst_type_list_list.append(dst_type)
-                source_line = {node_mapping1[id]:source_lineNum_list[id] for id in node_ids1}
-                source_lineNum_list_list.append(source_line)
-                dst_line = {node_mapping2[id]:dst_lineNum_list[id] for id in node_ids2}
-                dst_lineNum_list_list.append(dst_line)
-                source_value = {node_mapping1[id]:source_value_dict[id] for id in node_ids1}
-                source_value_dict_list.append(source_value)
-                dst_value = {node_mapping2[id]:dst_value_dict[id] for id in node_ids2}
-                dst_value_dict_list.append(dst_value)
-                source_decompile = {node_mapping1[id]:source_decompile_dict[id] for id in node_ids1}
-                source_decompile_dict_list.append(source_decompile)
-                dst_decompile = {node_mapping2[id]:dst_decompile_dict[id] for id in node_ids2}
-                dst_decompile_dict_list.append(dst_decompile)
-                source_func = {node_mapping1[id]:src_func_dict[id] for id in node_ids1}
-                src_func_dict_list.append(source_func)
-                dst_func = {node_mapping2[id]:des_func_dict[id] for id in node_ids2}
-                des_func_dict_list.append(dst_func)
+        #         node_mapping1 = {n:i for i, n in enumerate(node_ids1)}
+        #         node_mapping2 = {n:i for i, n in enumerate(node_ids2)}
+        #         node_mapping1_list.append(node_mapping1)
+        #         node_mapping2_list.append(node_mapping2)
+        #         embedding_1_list.append(torch.tensor([embedding_seq_1[i] for i in node_ids1]))
+        #         embedding_2_list.append(torch.tensor([embedding_seq_2[i] for i in node_ids2]))
+        #         edges1 = [[node_mapping1[e1], node_mapping1[e2]] for e1 in node_ids1 for e2 in edges1_dict[e1] if e2 in node_ids1]
+        #         edges2 = [[node_mapping2[e1], node_mapping2[e2]] for e1 in node_ids2 for e2 in edges2_dict[e1] if e2 in node_ids2]
+        #         edges_1_list.append(torch.tensor(edges1))
+        #         edges_2_list.append(torch.tensor(edges2))
+        #         trainy = [[node_mapping1[e1], node_mapping2[e2]] for e1 in node_ids1 for e2 in trainy_dict[e1] if e2 in node_ids2]
+        #         train_y_list.append(torch.tensor(trainy))
+        #         source_type = {node_mapping1[id]:source_type_list[id] for id in node_ids1}
+        #         source_type_list_list.append(source_type)
+        #         dst_type = {node_mapping2[id]:dst_type_list[id] for id in node_ids2}
+        #         dst_type_list_list.append(dst_type)
+        #         source_line = {node_mapping1[id]:source_lineNum_list[id] for id in node_ids1}
+        #         source_lineNum_list_list.append(source_line)
+        #         dst_line = {node_mapping2[id]:dst_lineNum_list[id] for id in node_ids2}
+        #         dst_lineNum_list_list.append(dst_line)
+        #         source_value = {node_mapping1[id]:source_value_dict[id] for id in node_ids1}
+        #         source_value_dict_list.append(source_value)
+        #         dst_value = {node_mapping2[id]:dst_value_dict[id] for id in node_ids2}
+        #         dst_value_dict_list.append(dst_value)
+        #         source_decompile = {node_mapping1[id]:source_decompile_dict[id] for id in node_ids1}
+        #         source_decompile_dict_list.append(source_decompile)
+        #         dst_decompile = {node_mapping2[id]:dst_decompile_dict[id] for id in node_ids2}
+        #         dst_decompile_dict_list.append(dst_decompile)
+        #         source_func = {node_mapping1[id]:src_func_dict[id] for id in node_ids1}
+        #         src_func_dict_list.append(source_func)
+        #         dst_func = {node_mapping2[id]:des_func_dict[id] for id in node_ids2}
+        #         des_func_dict_list.append(dst_func)
 
-            return embedding_1_list, edges_1_list, embedding_2_list, edges_2_list, train_y_list, source_type_list_list, dst_type_list_list, source_lineNum_list_list, dst_lineNum_list_list, func_matching_dict_list, src_func_dict_list, des_func_dict_list, source_value_dict_list, dst_value_dict_list, source_decompile_dict_list, dst_decompile_dict_list, node_mapping1_list, node_mapping2_list
+        #     return embedding_1_list, edges_1_list, embedding_2_list, edges_2_list, train_y_list, source_type_list_list, dst_type_list_list, source_lineNum_list_list, dst_lineNum_list_list, func_matching_dict_list, src_func_dict_list, des_func_dict_list, source_value_dict_list, dst_value_dict_list, source_decompile_dict_list, dst_decompile_dict_list, node_mapping1_list, node_mapping2_list

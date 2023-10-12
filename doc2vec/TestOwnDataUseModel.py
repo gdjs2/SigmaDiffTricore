@@ -18,12 +18,12 @@ model_path = 'llvm_3_7_0_vs_llvm_3_8_1'
 
 def processDGMC(dir, filename1, filename2, args):
     print(dir, filename1, filename2, args)
-    # with_gt = args.with_gt
+
     with_gt = False
     each_conf =  filename1 + '_vs_' + filename2
     subject_dir=dir+'/'+each_conf
 
-    print(each_conf)
+    # print(each_conf)
 
     # if(not os.path.exists(each_conf+'_Trained_Model.pkl')):
     #     continue

@@ -1,4 +1,5 @@
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -287,7 +288,11 @@ public class SigmadiffTricore extends GhidraScript {
             printf("Graph Write to File: %s\n", args[0]);
         }
 
-        writer = new BufferedWriter(new FileWriter(args[0]));
+        File graphFile = new File(args[0]);
+        if (graphFile.getParentFile().mkdirs()) {
+            println(String.format("Directory %s created.", args[0]));
+        }
+        writer = new BufferedWriter(new FileWriter(graphFile));
         debugger = new BufferedWriter(new FileWriter("./debug.txt"));
 
         graph = new SigmaGraph();
@@ -298,7 +303,7 @@ public class SigmadiffTricore extends GhidraScript {
         createFunctionAndVariableEdges();
         createVariableOrderEdges();
 
-        graph.export(writer, true);
+        graph.export(writer);
         writer.close();
         debugger.close();
 

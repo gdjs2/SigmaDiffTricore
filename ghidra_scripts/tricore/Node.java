@@ -25,4 +25,5 @@ public class Node {
     public ArrayList<Node> getEdges() {
         return edges;
     }
+
 }
