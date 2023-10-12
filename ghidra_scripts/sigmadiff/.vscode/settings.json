@@ -1,7 +1,0 @@
-{
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/lib/ghidra.jar",
-        "/Users/gdjs2/Desktop/sigmadiff/script/SigmaDiffTricore/lib/json-simple-1.1.1.jar"
-    ]
-}
