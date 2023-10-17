@@ -11,6 +11,8 @@ from loguru import logger
 from rich.console import Console
 from rich.progress import track
 
+import dgmc
+
 GRAPHS_DIR = "./tmp/graphs"
 SIGMADIFF_OUT_DIR = "./tmp/sigmadiff_out"
 PROJECT_NAME = "SigmadiffTricore"
@@ -32,9 +34,14 @@ def init_args():
     parser.add_argument(
         "--image2", type=str, required=True, help="The path to the second image"
     )
+    parser.add_argument(
+        "--emb1", type=str, help="The path to the first embedding"
+    )
+    parser.add_argument(
+        "--emb2", type=str, help="The path to the second embedding"
+    )
 
-    args = parser.parse_args()
-    return args.ghidra_home, args.project_path, args.image1, args.image2
+    return parser.parse_args()
 
 
 def execute_graph_generation_scripts(image1_path, image2_path):
@@ -90,11 +97,11 @@ def execute_graph_generation_scripts(image1_path, image2_path):
     execute_single(image1_path)
     execute_single(image2_path)
 
-
-def generate_embeddings(image1_path, image2_path):
+def get_embedding_packs(image1_path, image2_path, emb1_path, emb2_path):
     MODEL_PATH = os.path.join(DOC2VEC_PATH, DOC2VEC_MODEL)
 
     def generate_single_embedding(image_path):
+        
 
         image_name = os.path.basename(image_path)
         image_sigmadiff_out = os.path.join(SIGMADIFF_OUT_DIR, image_name)
@@ -194,17 +201,31 @@ def generate_embeddings(image1_path, image2_path):
             edges_dict[int(records[0])].append(int(records[1]))
         
         embedding = torch.tensor(embedding_seq_1)
-        all_func_emb = []
+        all_func_emb = {}
         for func in func_node_list.keys():
             node_ids = func_node_list[func]
             embs = embedding[node_ids]
             func_emb = torch.mean(embs, dim=0)
-            all_func_emb.append(func_emb)
-        with open(image_embedding, "wb") as f:
-            pickle.dump(torch.stack(all_func_emb), f, protocol=4)
+            all_func_emb[func] = func_emb
+        
+        with open(image_embedding, "wb") as f, console.status("[bold green]Saving the embedding for {} at {}...".format(image_name, image_embedding)) as status:
+            pickle.dump(all_func_emb, f)
+        
+        return all_func_emb
+    
+    if emb1_path is None:
+        emb1 = generate_single_embedding(image1_path)
+    else:
+        with console.status("[bold green]Loading the embedding for {} at {}...".format(image1_path, emb1_path)) as status:
+            emb1 = pickle.load(open(emb1_path, "rb"))
 
-    generate_single_embedding(image1_path)
-    generate_single_embedding(image2_path)
+    if emb2_path is None:
+        emb2 = generate_single_embedding(image2_path)
+    else:
+        with console.status("[bold green]Loading the embedding for {} at {}...".format(image2_path, emb2_path)) as status:
+            emb2 = pickle.load(open(emb2_path, "rb"))
+
+    return emb1, emb2
 
 if __name__ == "__main__":
     console = Console()
@@ -212,7 +233,13 @@ if __name__ == "__main__":
     logger.add(console.log)
     
     # Predefine some constants
-    GHIDRA_HOME, PROJECT_PATH, IMAGE1, IMAGE2 = init_args()
+    args = init_args()
+    GHIDRA_HOME = args.ghidra_home
+    PROJECT_PATH = args.project_path
+    IMAGE1 = args.image1
+    IMAGE2 = args.image2
+    EMB1 = args.emb1
+    EMB2 = args.emb2
 
     # Print some information
     logger.info("GHIDRA_HOME: {}".format(GHIDRA_HOME))
@@ -220,8 +247,14 @@ if __name__ == "__main__":
     logger.info("IMAGE1: {}".format(IMAGE1))
     logger.info("IMAGE2: {}".format(IMAGE2))
     logger.info("PROJECT_NAME: {}".format(PROJECT_NAME))
+    logger.info("EMBEDDING_PATH1: {}".format(EMB1))
+    logger.info("EMBEDDING_PATH2: {}".format(EMB2))
 
     # Execute the scripts
-    execute_graph_generation_scripts(IMAGE1, IMAGE2)
+    # execute_graph_generation_scripts(IMAGE1, IMAGE2)
     # Generate embeddings
-    generate_embeddings(IMAGE1, IMAGE2)
+    emb1, emb2 = get_embedding_packs(IMAGE1, IMAGE2, EMB1, EMB2)
+    # logger.info("emb1: {}".format(emb1))
+    # logger.info("emb2: {}".format(emb2))
+
+    dgmc.build_graph(IMAGE1, emb1)
